@@ -2,7 +2,7 @@ import torch
 from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
 import numpy as np
 
-
+# Define emotion columns (must match training script)
 emotion_columns = [
     "admiration", "amusement", "anger", "annoyance", "approval", "caring", "confusion",
     "curiosity", "desire", "disappointment", "disapproval", "disgust", "embarrassment",
@@ -11,7 +11,7 @@ emotion_columns = [
 ]
 
 # Load model and tokenizer
-model_path = "./mood_extractor_model"
+model_path = "./mood_extractor_model"  # Use "./results/checkpoint-20782" for a checkpoint
 try:
     tokenizer = DistilBertTokenizer.from_pretrained(model_path)
     model = DistilBertForSequenceClassification.from_pretrained(model_path)
@@ -22,7 +22,7 @@ except Exception as e:
 # Set device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
-model.eval()  # Set to evaluation mode
+model.eval()
 
 # Input text
 text = "I’m so excited about my new job!"
@@ -35,7 +35,7 @@ inputs = {key: val.to(device) for key, val in inputs.items()}
 with torch.no_grad():
     outputs = model(**inputs)
     logits = outputs.logits
-    probabilities = torch.sigmoid(logits).cpu().numpy()[0]  # Apply sigmoid to get probabilities
+    probabilities = torch.sigmoid(logits).cpu().numpy()[0]
 
 # Get predicted emotions (threshold > 0.5)
 threshold = 0.5
@@ -57,7 +57,7 @@ print("Predicted emotions:")
 for emotion in predicted_emotions:
     print(f"{emotion['label']}: {emotion['score']:.4f}")
 
-# Optional: Print all probabilities for debugging
+# Optional: Print all probabilities
 print("\nAll emotion probabilities:")
 for emotion, prob in zip(emotion_columns, probabilities):
     print(f"{emotion}: {prob:.4f}")
